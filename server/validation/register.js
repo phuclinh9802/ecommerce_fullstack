@@ -3,12 +3,16 @@ const isEmpty = require("is-empty");
 module.exports = function validateRegisterInput(data) {
     let errors = {};
     // Convert empty fields to an empty string so we can use validator functions
-    data.name = !isEmpty(data.name) ? data.name : "";
+    data.name = !isEmpty(data.firstName) ? data.firstName : "";
+    data.name = !isEmpty(data.lastName) ? data.lasttName : "";
     data.email = !isEmpty(data.email) ? data.email : "";
     data.password = !isEmpty(data.password) ? data.password : "";
     data.password2 = !isEmpty(data.password2) ? data.password2 : "";
     // Name checks
-    if (Validator.isEmpty(data.name)) {
+    if (Validator.isEmpty(data.firstName)) {
+        errors.name = "Name field is required";
+    }
+    if (Validator.isEmpty(data.lastName)) {
         errors.name = "Name field is required";
     }
     // Email checks
