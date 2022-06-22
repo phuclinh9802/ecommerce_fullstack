@@ -18,9 +18,52 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
-    date: {
+    dateCreated: {
         type: Date,
         default: Date.now
+    },
+    address: {
+        type: String,
+    },
+    city: {
+        type: String
+    },
+    state: {
+        type: String,
+    },
+    postalCode: {
+        type: Number,
+    },
+    country: {
+        type: String,
+    },
+    billAddress: {
+        type: String,
+    },
+    billCity: {
+        type: String
+    },
+    billCode: {
+        type: Number,
+    },
+    billCountry: {
+        type: String
+    },
+    shipAddress: {
+        type: String
+    },
+    shipCity: {
+        type: String,
+    },
+    shipCode: {
+        type: Number,
+    },
+    shipCountry: {
+        type: String,
     }
+
+
 });
+
+UserSchema.path('_id');
 module.exports = User = mongoose.model("users", UserSchema);
