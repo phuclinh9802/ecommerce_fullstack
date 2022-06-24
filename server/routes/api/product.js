@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 const data = require("../../data/product");
 const Product = require("../../db/Products");
+const cors = require('cors');
 
 router.get("/", (req, res, next) => {
   Product.find()
@@ -19,11 +20,11 @@ router.get("/:id", (req, res) => {
   });
 });
 
-router.post("/", (req, res, next) => {
-  token = req.headers["authorization"];
+router.post("/", cors(), (req, res, next) => {
+  var token = req.headers["authorization"];
 
   // remove Bearer
-  token = token.replace(/^Bearer\s+/, "");
+  token = String(token).replace(/^Bearer\s+/, "");
 
   if (token) {
     jwt.verify(token, keys.secretOrKey, (err, decoded) => {
@@ -46,8 +47,8 @@ router.post("/", (req, res, next) => {
               name: productName,
               image: productImage,
               description: productDescription,
-              price: productPrice,
-              quantity: productQuantity,
+              price: Number(productPrice),
+              quantity: Number(productQuantity),
             });
 
             newProduct.save();
