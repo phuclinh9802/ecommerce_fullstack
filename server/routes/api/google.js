@@ -1,15 +1,14 @@
-const router = require('express').Router();
-const passport = require('passport');
-const Users = require('../../db/Users');
+const router = require("express").Router();
+const passport = require("passport");
+const Users = require("../../db/Users");
 const jwt = require("jsonwebtoken");
-const keys = require('../../config/keys');
-const bcrypt = require('bcryptjs')
-const isAuthenticated = require('../../middlewares/auth');
-
+const keys = require("../../config/keys");
+const bcrypt = require("bcryptjs");
+const isAuthenticated = require("../../middlewares/auth");
 
 router.get("/user", (req, res) => {
   res.send(req.user);
-})
+});
 
 router.get("/login/success", (req, res) => {
   // var authorization = req.headers;
@@ -20,14 +19,19 @@ router.get("/login/success", (req, res) => {
   //   token: authorization
   // })
 
-  const email = req.user.email;
+  const googleId = req.user.googleId;
   const password = req.user.password;
+
   // Find user by email
-  Users.findOne({ email }).then((user) => {
+  Users.findOne({ googleId }).then((user) => {
     // Check if user exists
     if (!user) {
       return res.status(404).json({ emailnotfound: "Email not found" });
     }
+
+    console.log("has user " + user.email);
+    console.log("has user " + user.id);
+    console.log("has user " + user.firstName);
     // User matched
     // Create JWT Payload
     const payload = {
@@ -50,31 +54,31 @@ router.get("/login/success", (req, res) => {
         });
       }
     );
-
   });
-
 });
-
 
 router.get("/login/failed", (req, res) => {
   res.status(401).json({
     success: false,
-    message: "failure"
-  })
-})
+    message: "failure",
+  });
+});
 
-router.get('/google', passport.authenticate("google", { scope: ["profile", "email"] }))
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
-router.get("/google/callback",
+router.get(
+  "/google/callback",
   passport.authenticate("google", {
-    failureMessage: 'Cannot login, please try again',
-    successRedirect: 'http://localhost:3000/login/success'
-  })
-  , (req, res) => {
+    failureMessage: "Cannot login, please try again",
+    successRedirect: "http://localhost:3000/login/success",
+  }),
+  (req, res) => {
     console.log("req.user: " + JSON.stringify(req.user));
-    res.send("Thank you for signing in.")
+    res.send("Thank you for signing in.");
   }
-
 );
 
 // router.get('/google/callback', function (req, res, next) {
