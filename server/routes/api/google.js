@@ -19,6 +19,9 @@ router.get("/login/success", (req, res) => {
   //   token: authorization
   // })
 
+  if (typeof req.user == "undefined") {
+    return res.status(401).json({ error: "Please sign in again." });
+  }
   const googleId = req.user.googleId;
   const password = req.user.password;
 
@@ -76,7 +79,6 @@ router.get(
     successRedirect: "http://localhost:3000/login/success",
   }),
   (req, res) => {
-    console.log("req.user: " + JSON.stringify(req.user));
     res.send("Thank you for signing in.");
   }
 );
