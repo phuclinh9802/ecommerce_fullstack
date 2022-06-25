@@ -3,15 +3,58 @@ const passport = require('passport');
 const Users = require('../../db/Users');
 const jwt = require("jsonwebtoken");
 const keys = require('../../config/keys');
+const bcrypt = require('bcryptjs')
+const isAuthenticated = require('../../middlewares/auth');
 
+
+router.get("/user", (req, res) => {
+  res.send(req.user);
+})
 
 router.get("/login/success", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "success",
-    user: req.user
-  })
-})
+  // var authorization = req.headers;
+  // res.status(200).json({
+  //   success: true,
+  //   message: "success",
+  //   user: req.user,
+  //   token: authorization
+  // })
+
+  const email = req.user.email;
+  const password = req.user.password;
+  // Find user by email
+  Users.findOne({ email }).then((user) => {
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({ emailnotfound: "Email not found" });
+    }
+    // User matched
+    // Create JWT Payload
+    const payload = {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+    // Sign token
+    jwt.sign(
+      payload,
+      keys.secretOrKey,
+      {
+        expiresIn: 31556926, // 1 year in seconds
+      },
+      (err, token) => {
+        // res.send({ token: "Bearer " + token, redirect_path: "http://locahost:3000/dashboard" })
+        res.json({
+          success: true,
+          token: "Bearer " + token,
+        });
+      }
+    );
+
+  });
+
+});
+
 
 router.get("/login/failed", (req, res) => {
   res.status(401).json({
@@ -22,34 +65,17 @@ router.get("/login/failed", (req, res) => {
 
 router.get('/google', passport.authenticate("google", { scope: ["profile", "email"] }))
 
-router.get("/google/callback", (req, res, next) => {
-  passport.authenticate("google", (err, user, info) => {
-    console.log(user.id);
-    // console.log(Users.findOne({ id: user.id }));
-    Users.findOne({ id: user.id }).then(() => {
-      console.log(JSON.stringify(user))
-      const payload = {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      };
-      jwt.sign(
-        payload,
-        keys.secretOrKey,
-        {
-          expiresIn: 31556926, // 1 year in seconds
-        },
-        (err, token) => {
-          res.redirect('http://localhost:3000/dashboard').json({
-            success: true,
-            token: "Bearer " + token,
-          });
-        }
-      );
-    })
-  })(req, res, next);
-}
-)
+router.get("/google/callback",
+  passport.authenticate("google", {
+    failureMessage: 'Cannot login, please try again',
+    successRedirect: 'http://localhost:3000/login/success'
+  })
+  , (req, res) => {
+    console.log("req.user: " + JSON.stringify(req.user));
+    res.send("Thank you for signing in.")
+  }
+
+);
 
 // router.get('/google/callback', function (req, res, next) {
 //   console.log(req.url);

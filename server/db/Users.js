@@ -18,6 +18,9 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    googleId: {
+        type: String
+    },
     dateCreated: {
         type: Date,
         default: Date.now

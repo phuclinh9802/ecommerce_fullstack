@@ -6,6 +6,8 @@ const User = mongoose.model("users");
 const keys = require("../config/keys");
 const uuid = require('uuid').v4
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const jwt = require("jsonwebtoken");
+
 
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
@@ -31,36 +33,63 @@ module.exports = passport => {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             callbackURL: 'http://localhost:5000/auth/google/callback',
-            scope: ['profile'],
+            scope: ['profile', 'email'],
             state: true
         },
             function (accessToken, refreshToken, profile, done) {
-                console.log(profile.emails[0].value);
-                User.findOne({ id: profile.id }).then((user) => {
+                console.log(profile.id);
+
+                var usr = {
+                    id: profile.id, firstName: profile.name.givenName, lastName: profile.name.familyName, email: profile.emails[0].value, password: uuid(), googleId: profile.id
+                }
+                User.findOne({ googleId: profile.id }).then((user) => {
                     if (!user) {
-                        var usr = new User({
-                            id: profile.id, firstName: profile.given_name, lastName: profile.family_name, email: profile.emails[0].value, password: uuid()
-                        })
-                        usr.save();
-                        return;
+                        console.log("no user")
+                        newUser = new User(usr)
+                        newUser.save();
+                        console.log(JSON.stringify(user))
+                        const payload = {
+                            id: user.googleId,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            googleId: user.googleId,
+                        };
+                        jwt.sign(
+                            payload,
+                            keys.secretOrKey,
+                            {
+                                expiresIn: 31556926, // 1 year in seconds
+                            },
+                            (err, token) => {
+                                res.json({
+                                    success: true,
+                                    token: "Bearer " + token,
+                                });
+                            }
+                        );
                     }
                     return;
                 })
 
-                return done(null, profile);
-                // User.create({ id: profile.id, firstName: profile.given_name, lastName: profile.family_name, email: profile.emails[0].value, password: uuid() }, (err, user) => {
-                //     return done(null, user);
-                // })
+                if (usr) return done(null, usr);
             }
 
         )
     )
 
     passport.serializeUser((user, done) => {
-        done(null, user);
+        console.log("Serializing user:", user.googleId);
+        done(null, user.googleId);
     })
 
-    passport.deserializeUser((user, done) => {
-        done(null, user)
+    passport.deserializeUser(async (id, done) => {
+        const user = await User.findOne({ googleId: id }).catch((err) => {
+            console.log("Error deserializing", err);
+            done(err, null);
+        });
+
+        console.log("DeSerialized user", user);
+
+        if (user) done(null, user);
     });
 };
