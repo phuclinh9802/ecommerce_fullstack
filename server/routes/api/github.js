@@ -10,7 +10,7 @@ router.get("/user", (req, res) => {
   res.send(req.user);
 });
 
-router.get("/google/success", (req, res) => {
+router.get("/github/success", (req, res) => {
   // var authorization = req.headers;
   // res.status(200).json({
   //   success: true,
@@ -22,16 +22,16 @@ router.get("/google/success", (req, res) => {
   if (typeof req.user == "undefined") {
     return res.status(401).json({ error: "Please sign in again." });
   }
-  const googleId = req.user.googleId;
-  const password = req.user.password;
+  const githubId = req.user.githubId;
 
   // Find user by email
-  Users.findOne({ googleId }).then((user) => {
+  Users.findOne({ githubId }).then((user) => {
     // Check if user exists
     if (!user) {
       return res.status(404).json({ emailnotfound: "Email not found" });
     }
 
+    console.log("user --- " + JSON.stringify(user));
     console.log("has user " + user.email);
     console.log("has user " + user.id);
     console.log("has user " + user.firstName);
@@ -60,7 +60,7 @@ router.get("/google/success", (req, res) => {
   });
 });
 
-router.get("/google/failed", (req, res) => {
+router.get("/github/failed", (req, res) => {
   res.status(401).json({
     success: false,
     message: "failure",
@@ -68,13 +68,13 @@ router.get("/google/failed", (req, res) => {
 });
 
 router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  "/github",
+  passport.authenticate("github", { scope: ["user:email"] })
 );
 
 router.get(
-  "/google/callback",
-  passport.authenticate("google", {
+  "/github/callback",
+  passport.authenticate("github", {
     failureMessage: "Cannot login, please try again",
     successRedirect: "http://localhost:3000/login/success",
   }),

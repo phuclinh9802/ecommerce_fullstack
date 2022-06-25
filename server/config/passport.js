@@ -6,6 +6,7 @@ const User = mongoose.model("users");
 const keys = require("../config/keys");
 const uuid = require("uuid").v4;
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
+const GitHubStrategy = require("passport-github2").Strategy;
 const jwt = require("jsonwebtoken");
 
 const opts = {};
@@ -52,28 +53,28 @@ module.exports = (passport) => {
         User.findOne({ googleId: profile.id }).then((user) => {
           if (!user) {
             console.log("no user");
-            newUser = new User(usr);
+            let newUser = new User(usr);
             newUser.save();
             console.log(JSON.stringify(user));
-            const payload = {
-              id: user.googleId,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              googleId: user.googleId,
-            };
-            jwt.sign(
-              payload,
-              keys.secretOrKey,
-              {
-                expiresIn: 31556926, // 1 year in seconds
-              },
-              (err, token) => {
-                res.json({
-                  success: true,
-                  token: "Bearer " + token,
-                });
-              }
-            );
+            // const payload = {
+            //   id: usr.googleId,
+            //   firstName: usr.firstName,
+            //   lastName: usr.lastName,
+            //   googleId: usr.googleId,
+            // };
+            // jwt.sign(
+            //   payload,
+            //   keys.secretOrKey,
+            //   {
+            //     expiresIn: 31556926, // 1 year in seconds
+            //   },
+            //   (err, token) => {
+            //     res.json({
+            //       success: true,
+            //       token: "Bearer " + token,
+            //     });
+            //   }
+            // );
           }
           return;
         });
@@ -89,12 +90,18 @@ module.exports = (passport) => {
   });
 
   passport.deserializeUser(async (id, done) => {
-    const user = await User.findOne({ googleId: id }).catch((err) => {
+    console.log(id);
+    let user = await User.findOne({ googleId: id }).catch((err) => {
       console.log("Error deserializing", err);
       done(err, null);
     });
-
-    console.log("DeSerialized user", user);
+    if (!user) {
+      user = await User.findOne({ githubId: id }).catch((err) => {
+        console.log("Error deserializing", err);
+        done(err, null);
+      });
+    }
+    console.log("ddd user", user);
 
     if (user) done(null, user);
   });
