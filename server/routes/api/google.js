@@ -32,9 +32,11 @@ router.get("/google/success", (req, res) => {
       return res.status(404).json({ emailnotfound: "Email not found" });
     }
 
+    user.isSocial = true;
     console.log("has user " + user.email);
     console.log("has user " + user.id);
     console.log("has user " + user.firstName);
+    console.log("has user: " + user.isSocial)
     // User matched
     // Create JWT Payload
     const payload = {

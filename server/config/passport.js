@@ -49,6 +49,7 @@ module.exports = (passport) => {
           email: profile.emails[0].value,
           password: uuid(),
           googleId: profile.id,
+          isSocial: true,
         };
         User.findOne({ googleId: profile.id }).then((user) => {
           if (!user) {

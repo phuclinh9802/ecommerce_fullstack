@@ -24,6 +24,10 @@ const UserSchema = new Schema({
   githubId: {
     type: String,
   },
+  isSocial: {
+    type: Boolean,
+    default: false
+  },
   dateCreated: {
     type: Date,
     default: Date.now,
@@ -38,34 +42,50 @@ const UserSchema = new Schema({
     type: String,
   },
   postalCode: {
-    type: Number,
+    type: String,
   },
   country: {
     type: String,
   },
   billAddress: {
     type: String,
+    required: true,
   },
   billCity: {
     type: String,
+    required: true,
+  },
+  billState: {
+    type: String,
+    required: true,
   },
   billCode: {
-    type: Number,
+    type: String,
+    required: true,
   },
   billCountry: {
     type: String,
+    required: true,
   },
   shipAddress: {
     type: String,
+    required: true,
   },
   shipCity: {
     type: String,
+    required: true,
+  },
+  shipState: {
+    type: String,
+    required: true,
   },
   shipCode: {
-    type: Number,
+    type: String,
+    required: true,
   },
   shipCountry: {
     type: String,
+    required: true,
   },
 });
 
