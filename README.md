@@ -1,4 +1,4 @@
-# Ecommerce Project (full-stack) (coming soon...)
+# Ecommerce Project (full-stack) (Deployed!)
 
 ## Purpose: 
 <p>
@@ -20,3 +20,7 @@
 - Axios
 - ChakraUI
 - MaterialUI (icons)
+
+### Deployment:
+- Heroku
+- Mongo Cloud
